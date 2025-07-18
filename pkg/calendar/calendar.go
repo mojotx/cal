@@ -77,14 +77,10 @@ func DumpMonthToSlice(month time.Month, year int) []string {
 			lineSlice = append(lineSlice, line)
 		}
 	}
-	if err := scanner.Err(); err != nil {
-		color.Red("error reading calendar: %s", err.Error())
-		return nil
-	}
 	return lineSlice
 }
 
-// Spacer writes leading sp0aces to the buffer based on the weekday.
+// Spacer writes leading spaces to the buffer based on the weekday.
 func Spacer(b *bytes.Buffer, weekday time.Weekday) {
 	for n := int(weekday); n > 0; n-- {
 		b.WriteString("\u0020\u0020\u0020")
