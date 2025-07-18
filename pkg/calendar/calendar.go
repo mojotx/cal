@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"math"
+	"regexp"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -139,4 +140,10 @@ func DumpYear(year int) {
 	_ = dumpThreeMonths(year, time.April, time.May, time.June)
 	_ = dumpThreeMonths(year, time.July, time.August, time.September)
 	_ = dumpThreeMonths(year, time.October, time.November, time.December)
+}
+
+// Helper function to strip ANSI color codes for testing
+func stripAnsiCodes(s string) string {
+	ansi := regexp.MustCompile(`\x1b\[[0-9;]*m`)
+	return ansi.ReplaceAllString(s, "")
 }
