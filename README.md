@@ -1,5 +1,9 @@
 # Calendar Written In Go
 
+[![CI](https://github.com/mojotx/cal/actions/workflows/ci.yml/badge.svg)](https://github.com/mojotx/cal/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/mojotx/cal/actions/workflows/codeql.yml/badge.svg)](https://github.com/mojotx/cal/actions/workflows/codeql.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/mojotx/cal.svg)](https://pkg.go.dev/github.com/mojotx/cal)
+
 Inspired by the UNIX command "cal", this is an implementation written
 in pure Go. This comes in handy in restricted Git Bash sessions where
 you don't have access to the entire UNIX set of commands.
