@@ -14,6 +14,26 @@ import (
 	"github.com/pkg/errors"
 )
 
+const calendarWidth = 20
+
+var nowFunc = time.Now
+
+// ValidateMonth returns an error when a month is outside the valid range.
+func ValidateMonth(month int) error {
+	if month < int(time.January) || month > int(time.December) {
+		return fmt.Errorf("month must be between 1 and 12")
+	}
+	return nil
+}
+
+// ValidateYear returns an error when a year is not valid for calendar generation.
+func ValidateYear(year int) error {
+	if year <= 0 {
+		return fmt.Errorf("year must be greater than 0")
+	}
+	return nil
+}
+
 // NCenter centers a string in a buffer with a specified width.
 func NCenter(width int, s string) *bytes.Buffer {
 	const space = "\u0020"
@@ -33,7 +53,7 @@ func NCenter(width int, s string) *bytes.Buffer {
 // buildMonthCalendar generates a calendar for a specific month and year.
 func buildMonthCalendar(month time.Month, year int) string {
 	title := fmt.Sprintf("%s %d", month, year)
-	b := NCenter(20, title)
+	b := NCenter(calendarWidth, title)
 	b.WriteRune('\n')
 	b.WriteString("Su Mo Tu We Th Fr Sa\n")
 
@@ -44,7 +64,7 @@ func buildMonthCalendar(month time.Month, year int) string {
 	weekday := firstDayThisMonth.Weekday()
 	Spacer(b, weekday)
 
-	now := time.Now()
+	now := nowFunc()
 	todayYear, todayMonth, todayDay := now.Date()
 
 	for day := firstDayThisMonth; day.Before(lastDayThisMonth) || day.Equal(lastDayThisMonth); day = day.AddDate(0, 0, 1) {
@@ -94,7 +114,6 @@ func dumpThreeMonths(year int, months ...time.Month) error {
 	}
 
 	monthStrings := make(map[time.Month][]string)
-
 	for i := months[0]; i <= months[2]; i++ {
 		month := DumpMonthToSlice(i, year)
 		monthStrings[i] = month
@@ -104,14 +123,13 @@ func dumpThreeMonths(year int, months ...time.Month) error {
 
 	for i := range maxSliceLen {
 		for _, month := range months {
-			// Check for a line for this month
 			var subString string
 			if i <= len(monthStrings[month])-1 {
 				subString = monthStrings[month][i]
 			} else {
-				subString = strings.Repeat(" ", 20) // Empty space for alignment
+				subString = strings.Repeat(" ", calendarWidth)
 			}
-			fmt.Printf("%-20s    ", subString)
+			fmt.Printf("%-*s    ", calendarWidth, subString)
 		}
 		fmt.Print("\n")
 	}
@@ -131,11 +149,23 @@ func GetMaxSliceLen(slices ...[]string) int {
 }
 
 // DumpYear prints the calendar for an entire year.
-func DumpYear(year int) {
-	_ = dumpThreeMonths(year, time.January, time.February, time.March)
-	_ = dumpThreeMonths(year, time.April, time.May, time.June)
-	_ = dumpThreeMonths(year, time.July, time.August, time.September)
-	_ = dumpThreeMonths(year, time.October, time.November, time.December)
+func DumpYear(year int) error {
+	if err := ValidateYear(year); err != nil {
+		return err
+	}
+	if err := dumpThreeMonths(year, time.January, time.February, time.March); err != nil {
+		return err
+	}
+	if err := dumpThreeMonths(year, time.April, time.May, time.June); err != nil {
+		return err
+	}
+	if err := dumpThreeMonths(year, time.July, time.August, time.September); err != nil {
+		return err
+	}
+	if err := dumpThreeMonths(year, time.October, time.November, time.December); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Helper function to strip ANSI color codes for testing

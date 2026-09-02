@@ -24,7 +24,14 @@ func main() {
 			color.Red("error parsing year: %s", err.Error())
 			os.Exit(1)
 		}
-		calendar.DumpYear(int(year))
+		if err := calendar.ValidateYear(int(year)); err != nil {
+			color.Red("error: %s", err.Error())
+			os.Exit(1)
+		}
+		if err := calendar.DumpYear(int(year)); err != nil {
+			color.Red("error: %s", err.Error())
+			os.Exit(1)
+		}
 
 	// Two arguments: month and year
 	case 3:
@@ -36,6 +43,14 @@ func main() {
 		year, err := strconv.ParseInt(os.Args[2], 10, 64)
 		if err != nil {
 			color.Red("error parsing year: %s", err.Error())
+			os.Exit(1)
+		}
+		if err := calendar.ValidateMonth(int(month)); err != nil {
+			color.Red("error: %s", err.Error())
+			os.Exit(1)
+		}
+		if err := calendar.ValidateYear(int(year)); err != nil {
+			color.Red("error: %s", err.Error())
 			os.Exit(1)
 		}
 		calendar.DumpMonth(time.Month(month), int(year))
