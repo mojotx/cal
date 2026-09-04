@@ -24,10 +24,6 @@ func main() {
 			color.Red("error parsing year: %s", err.Error())
 			os.Exit(1)
 		}
-		if err := calendar.ValidateYear(year); err != nil {
-			color.Red("error: %s", err.Error())
-			os.Exit(1)
-		}
 		if err := calendar.DumpYear(year); err != nil {
 			color.Red("error: %s", err.Error())
 			os.Exit(1)

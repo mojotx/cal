@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"math"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -452,17 +451,10 @@ func TestDumpThreeMonths(t *testing.T) {
 	}
 }
 
-func TestDumpYearReturnsErrorWhenQuarterFails(t *testing.T) {
-	originalNow := nowFunc
-	nowFunc = func() time.Time {
-		return time.Date(2025, time.July, 15, 12, 0, 0, 0, time.UTC)
-	}
-	defer func() {
-		nowFunc = originalNow
-	}()
+func TestDumpYearReturnsErrorForInvalidYear(t *testing.T) {
+	err := DumpYear(0)
 
-	assert.NoError(t, DumpYear(2025))
-	assert.NotContains(t, strings.TrimSpace(buildMonthCalendar(time.July, 2025)), "\x1b[")
+	assert.EqualError(t, err, "year must be greater than 0")
 }
 
 func TestDumpYear(t *testing.T) {
