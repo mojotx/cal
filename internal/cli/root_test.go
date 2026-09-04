@@ -11,17 +11,22 @@ import (
 )
 
 // captureStdout redirects os.Stdout for the duration of fn and returns what was written.
+// Stdout is restored and the pipe is closed even if fn panics.
 func captureStdout(t *testing.T, fn func()) string {
 	t.Helper()
 	stdout := os.Stdout
 	r, w, err := os.Pipe()
 	require.NoError(t, err)
 	os.Stdout = w
+	defer func() {
+		os.Stdout = stdout
+		_ = r.Close()
+	}()
 
-	fn()
-
-	require.NoError(t, w.Close())
-	os.Stdout = stdout
+	func() {
+		defer func() { _ = w.Close() }()
+		fn()
+	}()
 
 	var buf bytes.Buffer
 	_, err = buf.ReadFrom(r)
