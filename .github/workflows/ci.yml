@@ -42,16 +42,9 @@ jobs:
       - name: Vet
         run: go vet ./...
       - name: Test
-        # Test execution is skipped on macOS: every compiled test binary
-        # aborts with dyld "missing LC_UUID load command" on macos-latest
-        # runners (https://github.com/golang/go/issues/61229), reproducing
-        # with or without -race and with the build cache disabled, so it's
-        # not something under our control. `go build` above still catches
-        # macOS-specific compile issues; see README "Known CI limitations".
-        if: matrix.os != 'macos-latest'
         run: go test -race -covermode=atomic -coverprofile=coverage.out ./...
       - name: Coverage summary
-        if: always() && matrix.os != 'macos-latest'
+        if: always()
         run: |
           {
             echo "### Coverage (${{ matrix.os }})"
@@ -61,7 +54,7 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload coverage artifact
-        if: always() && matrix.os != 'macos-latest'
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: coverage-${{ matrix.os }}

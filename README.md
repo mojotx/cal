@@ -10,8 +10,7 @@ you don't have access to the entire UNIX set of commands.
 
 ## Known CI limitations
 
-* **2026-09-01**: The macOS job in [ci.yml](.github/workflows/ci.yml) only runs `go build`, not `go test` — every compiled test binary aborts with `dyld: missing LC_UUID load command` on `macos-latest` runners (https://github.com/golang/go/issues/61229). This reproduces with or without `-race` and with the Go build cache disabled, so it isn't something under our control (also not reproducible on a current local machine, only on that runner). Revisit periodically: once this is root-caused or GitHub updates the runner image, re-enable the `Test`/`Coverage summary`/`Upload coverage artifact` steps for macOS in ci.yml (drop their `if: matrix.os != 'macos-latest'` conditions).
-* The primary maintainer develops on macOS and always runs `go test` there locally before pushing, which mitigates the gap in macOS test coverage left by the limitation above.
+* The CI matrix runs the race-enabled test suite on Linux, macOS, and Windows using the Go version declared in [go.mod](go.mod). If a runner-specific test failure appears, link the current failure and address that environment directly rather than disabling macOS tests globally.
 
 ## Installation
 
