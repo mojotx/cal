@@ -33,8 +33,13 @@ the calendar for the given month and year.`,
 }
 
 // Execute runs the root command using the process's command-line arguments.
+// Any error, whether from cobra itself (e.g. bad flags) or from runRoot, is printed here.
 func Execute() error {
-	return NewRootCmd().Execute()
+	err := NewRootCmd().Execute()
+	if err != nil {
+		color.Red("%s", err.Error())
+	}
+	return err
 }
 
 func runRoot(_ *cobra.Command, args []string) error {
@@ -74,8 +79,7 @@ func runRoot(_ *cobra.Command, args []string) error {
 	}
 }
 
-// reportError prints a red error message and returns it as an error, matching the prior CLI's UX.
+// reportError builds an error for runRoot; Execute prints it so all errors share one output path.
 func reportError(format string, args ...any) error {
-	color.Red(format, args...)
 	return fmt.Errorf(format, args...)
 }
