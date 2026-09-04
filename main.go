@@ -19,26 +19,37 @@ func main() {
 
 	// One argument is a year
 	case 2:
-		year, err := strconv.ParseInt(os.Args[1], 10, 64)
+		year, err := strconv.Atoi(os.Args[1])
 		if err != nil {
 			color.Red("error parsing year: %s", err.Error())
 			os.Exit(1)
 		}
-		calendar.DumpYear(int(year))
+		if err := calendar.DumpYear(year); err != nil {
+			color.Red("error: %s", err.Error())
+			os.Exit(1)
+		}
 
 	// Two arguments: month and year
 	case 3:
-		month, err := strconv.ParseInt(os.Args[1], 10, 64)
+		month, err := strconv.Atoi(os.Args[1])
 		if err != nil {
 			color.Red("error parsing month: %s", err.Error())
 			os.Exit(1)
 		}
-		year, err := strconv.ParseInt(os.Args[2], 10, 64)
+		year, err := strconv.Atoi(os.Args[2])
 		if err != nil {
 			color.Red("error parsing year: %s", err.Error())
 			os.Exit(1)
 		}
-		calendar.DumpMonth(time.Month(month), int(year))
+		if err := calendar.ValidateMonth(month); err != nil {
+			color.Red("error: %s", err.Error())
+			os.Exit(1)
+		}
+		if err := calendar.ValidateYear(year); err != nil {
+			color.Red("error: %s", err.Error())
+			os.Exit(1)
+		}
+		calendar.DumpMonth(time.Month(month), year)
 
 	default:
 		color.Red("usage: %s [month] [year]", os.Args[0])

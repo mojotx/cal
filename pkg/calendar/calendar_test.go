@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -62,6 +63,35 @@ func TestNCenter(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateMonthAndYear(t *testing.T) {
+	assert.NoError(t, ValidateMonth(1))
+	assert.NoError(t, ValidateMonth(12))
+	assert.Error(t, ValidateMonth(0))
+	assert.Error(t, ValidateMonth(13))
+
+	assert.NoError(t, ValidateYear(2024))
+	assert.NoError(t, ValidateYear(1))
+	assert.Error(t, ValidateYear(0))
+}
+
+func TestBuildMonthCalendarUsesInjectedNow(t *testing.T) {
+	originalNow := nowFunc
+	originalNoColor := color.NoColor
+	color.NoColor = false
+	nowFunc = func() time.Time {
+		return time.Date(2025, time.July, 15, 12, 0, 0, 0, time.UTC)
+	}
+	defer func() {
+		nowFunc = originalNow
+		color.NoColor = originalNoColor
+	}()
+
+	result := buildMonthCalendar(time.July, 2025)
+	assert.Contains(t, result, "\x1b[")
+	assert.Contains(t, stripAnsiCodes(result), "15")
+}
+
 func TestBuildMonthCalendar(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -106,6 +136,7 @@ func TestBuildMonthCalendar(t *testing.T) {
 		})
 	}
 }
+
 func TestStripAnsiCodes(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -146,6 +177,7 @@ func TestStripAnsiCodes(t *testing.T) {
 		})
 	}
 }
+
 func TestDumpMonth(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -189,7 +221,9 @@ func TestDumpMonth(t *testing.T) {
 
 			DumpMonth(tt.month, tt.year)
 
-			w.Close()
+			if err := w.Close(); err != nil {
+				t.Fatalf("Failed to close write pipe: %v", err)
+			}
 			os.Stdout = stdout
 			if _, err := buf.ReadFrom(r); err != nil {
 				t.Fatalf("Failed to read from pipe: %v", err)
@@ -200,6 +234,7 @@ func TestDumpMonth(t *testing.T) {
 		})
 	}
 }
+
 func TestDumpMonthToSlice(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -262,6 +297,7 @@ func TestDumpMonthToSlice(t *testing.T) {
 		})
 	}
 }
+
 func TestSpacer(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -298,6 +334,7 @@ func TestSpacer(t *testing.T) {
 		})
 	}
 }
+
 func TestGetMaxSliceLen(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -343,6 +380,7 @@ func TestGetMaxSliceLen(t *testing.T) {
 		})
 	}
 }
+
 func TestDumpThreeMonths(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -393,7 +431,9 @@ func TestDumpThreeMonths(t *testing.T) {
 
 			err := dumpThreeMonths(tt.year, tt.months...)
 
-			w.Close()
+			if closeErr := w.Close(); closeErr != nil {
+				t.Fatalf("Failed to close write pipe: %v", closeErr)
+			}
 			os.Stdout = stdout
 			if _, readErr := buf.ReadFrom(r); readErr != nil {
 				t.Fatalf("Failed to read from pipe: %v", readErr)
@@ -410,6 +450,13 @@ func TestDumpThreeMonths(t *testing.T) {
 		})
 	}
 }
+
+func TestDumpYearReturnsErrorForInvalidYear(t *testing.T) {
+	err := DumpYear(0)
+
+	assert.EqualError(t, err, "year must be greater than 0")
+}
+
 func TestDumpYear(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -494,9 +541,13 @@ func TestDumpYear(t *testing.T) {
 			r, w, _ := os.Pipe()
 			os.Stdout = w
 
-			DumpYear(tt.year)
+			if err := DumpYear(tt.year); err != nil {
+				t.Fatalf("DumpYear returned error: %v", err)
+			}
 
-			w.Close()
+			if closeErr := w.Close(); closeErr != nil {
+				t.Fatalf("Failed to close write pipe: %v", closeErr)
+			}
 			os.Stdout = stdout
 			if _, err := buf.ReadFrom(r); err != nil {
 				t.Fatalf("Failed to read from pipe: %v", err)
