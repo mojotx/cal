@@ -26,6 +26,25 @@ go install -v ./...
 
 This will install the cal binary into your `${GOBIN}` directory, e.g., `$HOME/go/bin`.
 
+## Usage
+
+`cal` accepts up to two positional arguments and supports `-h`/`--help`:
+
+```text
+$ cal --help
+cal prints a calendar to the terminal.
+
+With no arguments, it prints the current month. With one argument, it
+prints the entire calendar for that year. With two arguments, it prints
+the calendar for the given month and year.
+
+Usage:
+  cal [month] [year] [flags]
+
+Flags:
+  -h, --help   help for cal
+```
+
 ## Examples
 
 ### Current Date
